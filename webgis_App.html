@@ -1,0 +1,231 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>Intro to MapView - Create a 2D map | Sample | ArcGIS Maps SDK for JavaScript 4.29</title>
+    <style>
+      html,
+      body,
+      #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+        margin:12px 0;
+        }
+        
+      .header {
+       background-color: #1e8ece;
+       padding: 0px;
+       text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      position:absolute;
+      top:10px;
+      width:100%;
+      z-index:100;
+      margin:0;
+      
+       }
+       
+        #topbar {
+        background: #fff;
+        padding: 10px;
+      }
+
+      .action-button {
+        font-size: 16px;
+        background-color: transparent;
+        border: 1px solid #d3d3d3;
+        color: #6e6e6e;
+        height: 32px;
+        width: 32px;
+        text-align: center;
+        box-shadow: 0 0 1px rgba(0, 0, 0, 0.3);
+      }
+
+      .action-button:hover,
+      .action-button:focus {
+        background: #0079c1;
+        color: #e4e4e4;
+      }
+
+      .active {
+        background: #0079c1;
+        color: #e4e4e4;
+      }
+  
+      }
+    </style>
+
+    <link rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/light/main.css" />
+    <script src="https://js.arcgis.com/4.29/"></script>
+
+    <script>
+      require(["esri/Map",
+      "esri/views/MapView",
+      "esri/layers/FeatureLayer",
+      "esri/widgets/Legend",
+      "esri/widgets/ScaleBar",
+      "esri/widgets/Search",
+      "esri/widgets/BasemapGallery",
+      "esri/widgets/LayerList",
+       "esri/widgets/AreaMeasurement2D",
+        "esri/widgets/DistanceMeasurement2D",
+        "esri/widgets/Sketch",
+         "esri/layers/GraphicsLayer"
+      
+      ], 
+      
+      (Map, MapView,FeatureLayer,Legend,ScaleBar,Search,BasemapGallery,LayerList,AreaMeasurement2D, DistanceMeasurement2D,Sketch,GraphicsLayer) => {
+        var flayers = new FeatureLayer({url:"https://www.geosceneonline.cn/server/rest/services/Hosted/庐山景点分布/FeatureServer"});
+        
+        const map = new Map({
+          basemap: "topo-vector",
+          layers:[flayers]
+        });
+
+        const view = new MapView({
+          container: "viewDiv",
+          map: map,
+          zoom: 11,
+          center: [115.994609,29.555576] // longitude, latitude
+        });
+        
+        var legend = new Legend({
+          view:view,
+          layerInfos:[{
+            layer:flayers,
+            title:"图例"
+          }]
+        });
+        view.ui.add(legend,"bottom-right");
+        
+        let scaleBar = new ScaleBar({
+           view: view
+          });
+          view.ui.add(scaleBar, {
+          position: "bottom-left"
+          });
+          
+        const searchWidget = new Search({
+          view: view
+         });
+          view.ui.add(searchWidget, {
+          position: "top-right",
+          index: 2
+          });
+        
+      let basemapGallery = new BasemapGallery({
+      view: view
+      });
+      view.ui.add(basemapGallery, {
+      position: "top-left"
+      });
+        
+      let layerList = new LayerList({
+      view: view
+      });
+      view.ui.add(layerList, {
+      position: "top-right"
+      });
+   
+     view.ui.add("topbar", "top-right");
+
+        // create the measurement widgets and hide them by default
+        const distanceMeasurement2D = new DistanceMeasurement2D({
+          view,
+          visible: false
+        });
+        const areaMeasurement2D = new AreaMeasurement2D({
+          view,
+          visible: false
+        });
+
+        // event listener for distance measurements
+        document.getElementById("distanceButton").addEventListener("click", function() {
+          setActiveWidget(null);
+          if (!this.classList.contains("active")) {
+            setActiveWidget("distance");
+          } else {
+            setActiveButton(null);
+          }
+        });
+
+        // event listener for area measurements
+        document.getElementById("areaButton").addEventListener("click", function() {
+          setActiveWidget(null);
+          if (!this.classList.contains("active")) {
+            setActiveWidget("area");
+          } else {
+            setActiveButton(null);
+          }
+        });
+
+        function setActiveWidget(type) {
+          switch (type) {
+            case "distance":
+              areaMeasurement2D.visible = false;
+              distanceMeasurement2D.visible = true;
+              distanceMeasurement2D.viewModel.start();
+              setActiveButton(document.getElementById("distanceButton"));
+              break;
+            case "area":
+              distanceMeasurement2D.visible = false;
+              areaMeasurement2D.visible = true;
+              areaMeasurement2D.viewModel.start();
+              setActiveButton(document.getElementById("areaButton"));
+              break;
+            case null:
+              areaMeasurement2D.visible = false;
+              distanceMeasurement2D.visible = false;
+              break;
+          }
+        }
+
+        function setActiveButton(selectedButton) {
+          // focus the view to activate keyboard shortcuts for sketching
+          view.focus();
+          let elements = document.getElementsByClassName("active");
+          for (let i = 0; i < elements.length; i++) {
+            elements[i].classList.remove("active");
+          }
+          if (selectedButton) {
+            selectedButton.classList.add("active");
+          }
+        }
+        
+        
+        
+        const graphicsLayer = new GraphicsLayer();
+        
+        view.when(() => {
+        const sketch = new Sketch({
+          layer: graphicsLayer,
+          view: view,
+          // graphic will be selected as soon as it is created
+          creationMode: "update"
+        });
+
+        view.ui.add(sketch, "top-left");
+      });
+        
+        
+      });
+      
+      
+    </script>
+  </head>
+
+  <body>
+    
+    <div class="header">庐山景点分布</div>
+    <div id="viewDiv"></div>
+    <div id="topbar">
+      <button class="action-button esri-icon-measure-area" id="areaButton" type="button" title="Measure area"></button>
+      <button class="action-button esri-icon-measure-line" id="distanceButton" type="button" title="Measure distance between two or more points"></button>
+    </div>
+    
+  
+  </body>
+</html>
