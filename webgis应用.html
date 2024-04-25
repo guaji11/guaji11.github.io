@@ -78,7 +78,7 @@
       ], 
       
       (Map, MapView,FeatureLayer,Legend,ScaleBar,Search,BasemapGallery,LayerList,AreaMeasurement2D, DistanceMeasurement2D,Sketch,GraphicsLayer) => {
-        var flayers = new FeatureLayer({url:"https://www.geosceneonline.cn/server/rest/services/Hosted/全国各省年末常住人口/FeatureServer"});
+        var flayers = new FeatureLayer({url:"https://www.geosceneonline.cn/server/rest/services/Hosted/庐山景点分布/FeatureServer"});
         
         const map = new Map({
           basemap: "topo-vector",
@@ -88,8 +88,8 @@
         const view = new MapView({
           container: "viewDiv",
           map: map,
-          zoom: 4,
-          center: [100,34] // longitude, latitude
+          zoom: 11,
+          center: [115.994609,29.555576] // longitude, latitude
         });
         
         var legend = new Legend({
@@ -219,7 +219,7 @@
 
   <body>
     
-    <div class="header">全国各省常住人口</div>
+    <div class="header">庐山景点分布</div>
     <div id="viewDiv"></div>
     <div id="topbar">
       <button class="action-button esri-icon-measure-area" id="areaButton" type="button" title="Measure area"></button>
